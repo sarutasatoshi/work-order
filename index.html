@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="作業指示書">
+<meta name="theme-color" content="#2b3f63">
+<title>作業指示書</title>
+<style>
+  :root { --main:#2b3f63; --accent:#c9771a; --bg:#eceff3; --line:#d3d9e0; --text:#1d2329; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+         -webkit-text-size-adjust:100%; }
+  header { position:sticky; top:0; z-index:5; background:var(--main); color:#fff;
+           padding:calc(env(safe-area-inset-top) + 10px) 12px 10px; display:flex; align-items:center; gap:10px; }
+  header h1 { font-size:18px; margin:0; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  header button { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6); border-radius:8px; padding:7px 12px; font-size:14px; font-weight:600; }
+  main { max-width:720px; margin:0 auto; padding:8px 10px 120px; }
+
+  /* ===== 一覧 ===== */
+  .hbar { display:flex; gap:8px; margin:6px 0 12px; }
+  .hbar input { margin:0; flex:1; min-width:0; }
+  .hbar .btn { white-space:nowrap; font-weight:700; }
+  .card { display:flex; align-items:center; gap:10px; background:#fff; border-radius:12px; padding:10px; margin-bottom:8px;
+          box-shadow:0 1px 3px rgba(0,0,0,.12); cursor:pointer; -webkit-tap-highlight-color:rgba(43,63,99,.12); }
+  .cimg { width:60px; height:60px; flex:none; border-radius:8px; background:#eef1f4 center/cover no-repeat;
+          display:flex; align-items:center; justify-content:center; font-size:24px; color:#9aa4ad; }
+  .cbody { flex:1; min-width:0; }
+  .ctitle { font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ctitle.faint { color:#8a959f; font-weight:600; }
+  .csub { font-size:12.5px; color:#5f6b75; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; margin-top:4px; background:#eef1f4; color:#5f6b75; }
+  .badge.ok { background:#e3f2ea; color:#2f7d5b; }
+  .badge.warn { background:#fdf0dc; color:#a86412; }
+  .cmore { flex:none; border:none; background:transparent; font-size:22px; padding:6px 10px; color:#5f6b75; }
+  .empty { text-align:center; color:#6b7680; font-size:14px; padding:40px 10px; line-height:1.7; white-space:pre-line; }
+
+  /* ===== 入力画面 ===== */
+  .fs { background:#fff; border-radius:12px; padding:4px 12px 14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .fs h2 { font-size:15px; margin:10px 0 2px; color:var(--main); display:flex; align-items:baseline; gap:8px; }
+  label { display:block; font-size:12.5px; color:#56616b; margin-top:10px; }
+  input[type=text], input[type=date], input[type=time], input[type=search], textarea {
+         display:block; width:100%; margin-top:3px; font-size:16px; padding:9px 10px; min-height:42px;
+         border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--text); font-family:inherit; -webkit-appearance:none; appearance:none; }
+  textarea { resize:vertical; line-height:1.55; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0 10px; }
+  .inrow { display:flex; gap:6px; align-items:stretch; margin-top:3px; }
+  .inrow input, .inrow textarea { margin-top:0; flex:1; min-width:0; }
+  .mapbtn { flex:none; border:1px solid var(--line); background:#f4f7fa; border-radius:8px; padding:0 10px; font-size:13px; color:var(--main); font-weight:600; }
+  .cnt { font-size:11.5px; color:#7a858f; font-weight:400; margin-left:auto; }
+  .cnt.over { color:#c0392b; font-weight:700; }
+  .cnt.warn { color:#a86412; font-weight:700; }
+  .note-s { font-size:11.5px; color:#7a858f; margin:6px 0 0; line-height:1.5; }
+
+  .mat { display:grid; grid-template-columns:auto 1fr auto; gap:6px; align-items:center; padding:8px 0; border-bottom:1px solid #eef1f4; }
+  .mat input.mname { margin:0; }
+  .mchk { border:1.5px solid #b9c2cb; background:#fff; color:#5f6b75; border-radius:8px; padding:9px 8px; font-size:13px; font-weight:700; white-space:nowrap; min-width:76px; }
+  .mchk.on { border-color:#2f7d5b; background:#e3f2ea; color:#2f7d5b; }
+  .mdel { border:none; background:transparent; font-size:18px; color:#9aa4ad; padding:6px 6px; }
+  .mdl { grid-column:2 / 4; margin:0; display:flex; align-items:center; gap:8px; font-size:13px; color:#2f7d5b; }
+  .mdl[hidden] { display:none; }
+  .mdl input { margin:0; width:auto; flex:1; min-height:36px; padding:6px 8px; }
+
+  .phgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:8px; margin-top:10px; }
+  .pcard { background:#f6f8fa; border:1px solid var(--line); border-radius:10px; overflow:hidden; cursor:pointer; }
+  .pcard .pim { aspect-ratio:4/3; background:#dde3e8 center/contain no-repeat; }
+  .pcard .pno { font-size:12px; font-weight:700; padding:5px 8px 0; color:var(--main); }
+  .pcard .pmemo { font-size:12px; padding:2px 8px 7px; color:#4a5560; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pcard .pmemo.faint { color:#9aa4ad; }
+
+  .bbar { position:fixed; left:0; right:0; bottom:0; z-index:6; background:rgba(255,255,255,.96); border-top:1px solid var(--line);
+          padding:10px 12px calc(env(safe-area-inset-bottom) + 10px); display:flex; gap:10px; justify-content:center; }
+  .bbar .btn { flex:1; max-width:340px; font-weight:700; }
+
+  .btn { font-size:15px; padding:11px 14px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--text); cursor:pointer; }
+  .btn.primary { background:var(--main); color:#fff; border-color:var(--main); }
+  .btn.accent { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn.danger { color:#c0392b; }
+  .btn.wide { display:block; width:100%; margin-top:12px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .row .btn { flex:1; }
+
+  .modal { position:fixed; inset:0; z-index:20; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:12px; }
+  .modal[hidden] { display:none; }
+  .modal.full { align-items:flex-start; padding:calc(env(safe-area-inset-top) + 8px) 8px 8px; }
+  .modal-body { background:#fff; border-radius:14px; padding:12px 14px; width:100%; max-width:900px; max-height:100%; overflow:auto; }
+  .modal-body.small { max-width:420px; }
+  .modal-body.form { max-width:560px; padding-bottom:calc(env(safe-area-inset-bottom) + 14px); }
+  .modal-body h3 { margin:4px 0 8px; font-size:17px; }
+  .modal-body p { font-size:14px; line-height:1.6; margin:0 0 10px; word-break:break-all; }
+  .mhead { display:flex; align-items:center; gap:8px; position:sticky; top:-12px; background:#fff; padding:6px 0; z-index:1; }
+  .mhead h3 { flex:1; text-align:center; margin:0; }
+  .mhead .btn { padding:8px 12px; }
+  .cthumb { text-align:center; margin:6px 0 2px; }
+  .cthumb img { max-width:100%; max-height:30vh; border-radius:8px; }
+  .menu button { display:block; width:100%; text-align:left; margin-bottom:8px; }
+  .menu .desc { display:block; font-size:12px; color:#7a858f; margin-top:2px; font-weight:400; }
+  .menu .btn.primary .desc, .menu .btn.accent .desc { color:rgba(255,255,255,.85); }
+  .pv canvas { display:block; width:100%; height:auto; margin:0 auto 12px; box-shadow:0 1px 5px rgba(0,0,0,.3); background:#fff; }
+  .pvcap { font-size:12.5px; color:#5f6b75; margin:2px 0 4px; }
+  #toast { position:fixed; left:50%; bottom:100px; transform:translateX(-50%); background:rgba(20,20,20,.88); color:#fff; padding:10px 16px;
+           border-radius:10px; font-size:14px; z-index:30; max-width:90vw; display:none; }
+  #busy { position:fixed; inset:0; z-index:40; background:rgba(255,255,255,.75); display:none; align-items:center; justify-content:center; font-size:16px; font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <button id="btnBack" hidden>◀ 一覧</button>
+  <h1 id="hTitle">作業指示書</h1>
+  <button id="btnMore" hidden>⋯</button>
+</header>
+
+<!-- 一覧（最初の画面） -->
+<main id="home">
+  <div class="hbar">
+    <input type="search" id="q" placeholder="🔍 工事名・客先・日付などで検索">
+    <button class="btn primary" id="btnCreate">＋ 新規作成</button>
+  </div>
+  <div id="list"></div>
+</main>
+
+<!-- 入力画面 -->
+<main id="edit" hidden>
+  <div class="fs">
+    <h2>基本</h2>
+    <div class="grid2">
+      <label>作成日<input type="date" data-k="makeDate"></label>
+      <label>作成者<input type="text" data-k="author" placeholder="例：山田"></label>
+    </div>
+    <label>工事名<input type="text" data-k="koji" placeholder="例：○○工場 排気ダクト改修工事"></label>
+    <div class="grid2">
+      <label>作業日<input type="date" data-k="workDate"></label>
+      <label>終了日（複数日のとき）<input type="date" data-k="workDateEnd"></label>
+    </div>
+    <div class="grid2">
+      <label>集合時間<input type="time" data-k="meetTime"></label>
+      <label>使用車両<input type="text" data-k="car" placeholder="例：ハイエース"></label>
+    </div>
+    <label>集合場所<div class="inrow"><input type="text" data-k="meetPlace" placeholder="例：会社 / 現地"><button class="mapbtn" data-map="meetPlace">🗺 地図</button></div></label>
+    <label>作業人員<input type="text" data-k="members" placeholder="例：4名（山田・佐藤・協力会社2名）"></label>
+  </div>
+
+  <div class="fs">
+    <h2>関係先</h2>
+    <label>元請 <span class="cnt" data-cnt="motouke"></span><textarea rows="2" data-k="motouke" placeholder="例：○○建設(株)"></textarea></label>
+    <label>担当者／連絡先 <span class="cnt" data-cnt="tanto"></span><textarea rows="2" data-k="tanto" placeholder="例：鈴木様 090-xxxx-xxxx"></textarea></label>
+    <label>客先 <span class="cnt" data-cnt="kyaku"></span><textarea rows="2" data-k="kyaku" placeholder="例：○○株式会社 △△工場"></textarea></label>
+    <label>客先住所 <span class="cnt" data-cnt="address"></span><div class="inrow"><textarea rows="2" data-k="address" placeholder="例：神奈川県○○市…"></textarea><button class="mapbtn" data-map="address">🗺 地図</button></div></label>
+    <label>駐車場 <span class="cnt" data-cnt="parking"></span><div class="inrow"><textarea rows="2" data-k="parking" placeholder="例：構内 第2駐車場（守衛所で受付）"></textarea><button class="mapbtn" data-map="parking">🗺 地図</button></div></label>
+    <label>協力会社 <span class="cnt" data-cnt="kyoryoku"></span><textarea rows="2" data-k="kyoryoku" placeholder="例：○○設備 2名"></textarea></label>
+  </div>
+
+  <div class="fs">
+    <h2>作業内容 <span class="cnt" data-cnt="naiyo"></span></h2>
+    <textarea rows="8" data-k="naiyo" placeholder="例：&#10;・既設ダクト撤去（2F 408室）&#10;・新設ダクト取付 φ200 ×12m"></textarea>
+  </div>
+
+  <div class="fs">
+    <h2>発注部材 <span class="cnt" data-cnt="mats"></span></h2>
+    <p class="note-s" style="margin-top:2px">発注したら「未発注」をタップ → ✓と今日の日付が入ります。</p>
+    <div id="mats"></div>
+    <button class="btn wide" id="matAdd">＋ 部材を追加</button>
+  </div>
+
+  <div class="fs">
+    <h2>準備資機材 <span class="cnt" data-cnt="shizai"></span></h2>
+    <textarea rows="8" data-k="shizai" placeholder="例：&#10;・脚立 6尺 ×2&#10;・インパクト、ディスクグラインダー"></textarea>
+  </div>
+
+  <div class="fs">
+    <h2>備考 <span class="cnt" data-cnt="biko"></span></h2>
+    <textarea rows="3" data-k="biko" placeholder="例：入構時に安全靴・ヘルメット必須"></textarea>
+  </div>
+
+  <div class="fs">
+    <h2>現場写真 <span class="cnt" id="phCnt"></span></h2>
+    <p class="note-s" style="margin-top:2px">2ページ目以降に1ページ4枚で入ります。写真をタップ → メモ・回転・並べ替え・削除。</p>
+    <div class="phgrid" id="phGrid"></div>
+    <div class="row">
+      <button class="btn" id="btnShot">📷 撮影する</button>
+      <button class="btn" id="btnPick">🖼 写真を選ぶ</button>
+    </div>
+  </div>
+</main>
+
+<div class="bbar" id="bbar" hidden>
+  <button class="btn" id="btnPreview">👁 仕上がりを見る</button>
+  <button class="btn accent" id="btnOut">📤 送る・保存</button>
+</div>
+
+<input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+<input type="file" id="libIn" accept="image/*" multiple hidden>
+
+<!-- ボタンが並ぶ小さなメニュー -->
+<div class="modal" id="sheet" hidden>
+  <div class="modal-body small menu">
+    <h3 id="shTitle"></h3>
+    <div id="shBtns"></div>
+  </div>
+</div>
+
+<!-- 写真のメモ -->
+<div class="modal full" id="memo" hidden>
+  <div class="modal-body form">
+    <div class="mhead">
+      <button class="btn" id="mPrev">◀ 前</button>
+      <h3 id="mHead"></h3>
+      <button class="btn" id="mNext">次 ▶</button>
+    </div>
+    <div class="cthumb"><img id="mImg" alt=""></div>
+    <label>メモ <span class="cnt" id="mCnt"></span><textarea id="mText" rows="6" placeholder="例：既設ダクト。ここから先を撤去"></textarea></label>
+    <button class="btn primary wide" id="mDone">完了</button>
+  </div>
+</div>
+
+<!-- 仕上がり（PDFと同じ見た目） -->
+<div class="modal full" id="preview" hidden>
+  <div class="modal-body">
+    <div class="mhead"><h3 style="text-align:left">仕上がり</h3><button class="btn" id="pvClose">✕ 閉じる</button></div>
+    <div class="pv" id="pvBox"></div>
+  </div>
+</div>
+
+<!-- 出力 -->
+<div class="modal" id="ready" hidden>
+  <div class="modal-body small menu">
+    <h3>PDFとExcelができました</h3>
+    <p id="readyMsg"></p>
+    <button class="btn accent" id="rBoth">📧 PDFとExcelを送る<span class="desc">メールなら2つとも添付されます</span></button>
+    <button class="btn" id="rPdf">📄 PDFだけ送る<span class="desc">LINEなどで送るときはこちら</span></button>
+    <button class="btn" id="rXlsx">📊 Excelだけ送る</button>
+    <button class="btn" id="rDl">💾 この端末に保存（ダウンロード）</button>
+    <button class="btn" id="rClose">閉じる</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="busy">作成中…</div>
+
+<script>
+'use strict';
+/* ================= 基本 ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const pad2 = n => String(n).padStart(2, '0');
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const WD = '日月火水木金土';
+const ymd = s => { if (!s) return null; const [y, m, d] = s.split('-').map(Number); if (!y) return null; return { y, m, d, w: WD[new Date(y, m - 1, d).getDay()] }; };
+const jpDate = s => { const a = ymd(s); return a ? `${a.y}年${a.m}月${a.d}日` : ''; };
+function workDateStr(f) {
+  const a = ymd(f.workDate); if (!a) return '';
+  let s = `${a.y}年${a.m}月${a.d}日(${a.w})`;
+  const b = ymd(f.workDateEnd);
+  if (b && f.workDateEnd !== f.workDate) s += '〜' + (b.y !== a.y ? `${b.y}年${b.m}月${b.d}日` : b.m !== a.m ? `${b.m}月${b.d}日` : `${b.d}日`) + `(${b.w})`;
+  return s;
+}
+const timeStr = t => { if (!t) return ''; const [h, m] = t.split(':'); return `${+h}:${m}`; };
+
+function toast(msg, ms = 2600) {
+  const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = 'none', ms);
+}
+function busy(on, msg = '作成中…') { const b = $('#busy'); b.textContent = msg; b.style.display = on ? 'flex' : 'none'; }
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+const toBlob = (cv, type, q) => new Promise(r => cv.toBlob(r, type, q));
+
+/* ================= 保存（端末内のみ） ================= */
+const DOC_KEY = 'workOrder.docs.v1';
+const SET_KEY = 'workOrder.settings.v1';
+let cfg = { author: '' };
+let docs = [];
+let cur = null;     // 開いている指示書
+let photos = [];    // 開いている指示書の写真
+const newDoc = o => Object.assign({ id: uid(), created: Date.now(), updated: Date.now(), exported: 0, count: 0, thumb: '', thumbKey: '',
+  f: { makeDate: todayStr(), author: cfg.author || '' }, mats: [] }, o);
+function loadStore() {
+  try { const c = JSON.parse(localStorage.getItem(SET_KEY)); if (c) cfg = Object.assign(cfg, c); } catch (e) {}
+  try { const d = JSON.parse(localStorage.getItem(DOC_KEY)); if (Array.isArray(d)) docs = d; } catch (e) {}
+}
+const saveCfg = () => { try { localStorage.setItem(SET_KEY, JSON.stringify(cfg)); } catch (e) {} };
+function saveDocs() { try { localStorage.setItem(DOC_KEY, JSON.stringify(docs)); } catch (e) { toast('保存に失敗しました: ' + e.message); } }
+const saveDocsLater = debounce(saveDocs, 400);
+function touch() { if (!cur) return; cur.updated = Date.now(); saveDocsLater(); }
+
+let dbp;
+function db() {
+  if (!dbp) dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('workOrder', 1);
+    r.onupgradeneeded = () => { const s = r.result.createObjectStore('photos', { keyPath: 'id' }); s.createIndex('rid', 'rid'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  return dbp;
+}
+async function tx(mode, fn) {
+  const d = await db();
+  return new Promise((res, rej) => {
+    const t = d.transaction('photos', mode); const req = fn(t.objectStore('photos')); let out;
+    if (req) req.onsuccess = () => { out = req.result; };
+    t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  });
+}
+const dbPut = p => tx('readwrite', s => s.put(p));
+const dbDel = id => tx('readwrite', s => s.delete(id));
+const dbByRid = rid => tx('readonly', s => s.index('rid').getAll(rid));
+const dbDelRid = rid => tx('readwrite', s => {
+  const req = s.index('rid').openKeyCursor(IDBKeyRange.only(rid));
+  req.onsuccess = () => { const c = req.result; if (c) { s.delete(c.primaryKey); c.continue(); } };
+});
+const sortedPhotos = () => photos.slice().sort((a, b) => a.order - b.order);
+
+/* ================= 画像 ================= */
+function loadImg(src) {
+  return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('画像を開けません')); i.src = src; });
+}
+const imgCache = new Map();
+function getImg(p) {
+  if (!imgCache.has(p.id)) imgCache.set(p.id, loadImg(URL.createObjectURL(p.blob)));
+  return imgCache.get(p.id);
+}
+// 撮影画像を長辺1800pxのJPEGに縮小して保存（向きはブラウザが補正）
+async function normalizeImage(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(url);
+    const k = Math.min(1, 1800 / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    return { blob: await toBlob(c, 'image/jpeg', 0.88), w, h };
+  } finally { URL.revokeObjectURL(url); }
+}
+// 回転を反映した画像
+async function compose(p, maxSide) {
+  const img = await getImg(p);
+  const rot = p.rot || 0, sw = img.naturalWidth, sh = img.naturalHeight;
+  const W = rot % 180 ? sh : sw, H = rot % 180 ? sw : sh;
+  const k = maxSide ? Math.min(1, maxSide / Math.max(W, H)) : 1;
+  const cw = Math.round(W * k), ch = Math.round(H * k);
+  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  const g = c.getContext('2d');
+  g.translate(cw / 2, ch / 2); g.rotate(rot * Math.PI / 180);
+  const dw = rot % 180 ? ch : cw, dh = rot % 180 ? cw : ch;
+  g.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+  return c;
+}
+const thumbs = new Map(); // `${id}:${v}:${rot}` → Promise<URL>
+function thumbOf(p) {
+  const key = `${p.id}:${p.v}:${p.rot || 0}`;
+  if (!thumbs.has(key)) thumbs.set(key, compose(p, 500).then(cv => toBlob(cv, 'image/jpeg', 0.8)).then(b => URL.createObjectURL(b)));
+  return thumbs.get(key);
+}
+
+/* ================= レイアウト（PDF・Excel・仕上がり表示で共通）=================
+   雛形と同じ 30列 × 49行 のマス目。1列 = 15pt、1行 = 15pt。 */
+const COLS = 30, ROWS = 49;
+const PT = 25.4 / 72;                 // 1pt の mm
+const COL_MM = 15 * PT;
+const ROW_MM = 15 * PT;
+const PAD = 0.9;                      // 文字の左右の余白(mm)
+const FONT = '"BIZ UDPMincho","BIZ UDMincho","Hiragino Mincho ProN","Hiragino Mincho Pro","Yu Mincho","YuMincho","MS PMincho",serif';
+const KIND = { title: { pt: 12 }, label: { pt: 9, ul: true }, sm: { pt: 9 }, val: { pt: 10 } };
+const VAL_PT = KIND.val.pt;
+const textW = cols => cols * COL_MM - PAD * 2;
+const mctx = document.createElement('canvas').getContext('2d');
+function measure(t, pt) { mctx.font = `${pt * 10}px ${FONT}`; return mctx.measureText(t).width / 10 * PT; }
+// 枠の幅に合わせて改行した行の一覧
+function wrap(text, wmm, pt = VAL_PT) {
+  const out = [];
+  for (const para of String(text || '').replace(/\r/g, '').split('\n')) {
+    let line = '';
+    for (const ch of para) {
+      if (line && measure(line + ch, pt) > wmm) {
+        // 句読点などは行頭に来ないよう、少しだけはみ出して前の行に付ける
+        if ('、。，．）」』】・ーっゃゅょッャュョ'.includes(ch) && measure(line + ch, pt) <= wmm * 1.06) { line += ch; continue; }
+        out.push(line); line = ch;
+      } else line += ch;
+    }
+    out.push(line);
+  }
+  while (out.length && !out[out.length - 1].trim()) out.pop();
+  return out;
+}
+// 入力欄ごとの [幅(列数), 行数]
+const LIMITS = { motouke: [15, 2], tanto: [15, 2], kyaku: [15, 2], address: [15, 2], parking: [15, 2], kyoryoku: [15, 2],
+  naiyo: [30, 8], shizai: [30, 11], biko: [30, 3], mats: [30, 8] };
+const MEMO_LINES = 10, MEMO_COLS = 10, PER_PAGE = 4;
+const mdStr = s => { const a = ymd(s); return a ? `${a.m}/${a.d}` : ''; };
+const matText = m => `${m.done ? '☑' : '□'} ${m.name.trim()}${m.done ? `　（${m.date ? mdStr(m.date) + ' ' : ''}発注済）` : ''}`;
+function linesFor(d, key) {
+  if (key === 'mats') return (d.mats || []).filter(m => (m.name || '').trim()).flatMap(m => wrap(matText(m), textW(30)));
+  return wrap(d.f[key], textW(LIMITS[key][0]));
+}
+
+// 行が多すぎるときは、最後の行に残りをまとめる（その行だけ文字が小さくなる）
+function fitLines(ls, n) {
+  if (ls.length <= n) return ls;
+  return [...ls.slice(0, n - 1), ls.slice(n - 1).map(s => s.trim()).filter(Boolean).join('　')];
+}
+// 1ページ目の下の4つの欄（雛形の行数が基本。足りない欄には、空いている欄の行を回す）
+const SECS = [
+  { key: 'naiyo', def: 8, label: '作業内容' },
+  { key: 'mats', def: 8, label: '発注部材（※発注したらチェックと日付を記入する事）' },
+  { key: 'shizai', def: 11, label: '準備資機材' },
+  { key: 'biko', def: 3, label: '備考' },
+];
+const SEC_TOTAL = SECS.reduce((a, s) => a + s.def, 0); // 30行
+const SEC_MIN = 2;  // 空の欄でも最低この行数は残す
+function allocate(d) {
+  const lines = SECS.map(s => linesFor(d, s.key)), need = lines.map(l => l.length);
+  const alloc = SECS.map((s, i) => Math.min(s.def, Math.max(need[i], SEC_MIN)));
+  let free = SEC_TOTAL - alloc.reduce((a, b) => a + b, 0);
+  // 足りない欄に空きを回す
+  SECS.forEach((s, i) => { const add = Math.min(free, Math.max(0, need[i] - alloc[i])); alloc[i] += add; free -= add; });
+  // 余った行は、雛形の行数に戻していく
+  SECS.forEach((s, i) => { const add = Math.min(free, Math.max(0, s.def - alloc[i])); alloc[i] += add; free -= add; });
+  if (free > 0) alloc[2] += free;
+  const short = need.reduce((a, n, i) => a + Math.max(0, n - alloc[i]), 0); // 入りきらない行数
+  return { lines, need, alloc, short };
+}
+const newPage = (name) => ({ name, cells: [], boxes: [], dots: [], imgs: [] });
+// 2ページ目以降の上の見出し
+function pageHead(pg, d, title) {
+  pg.boxes.push([1, 1, 2, 10], [1, 11, 1, 30], [2, 11, 2, 30]);
+  pg.cells.push({ r: 1, r2: 2, c: 1, c2: 10, k: 'title', text: title });
+  pg.cells.push({ r: 1, c: 11, c2: 30, k: 'sm', text: '工事名　' + (d.f.koji || '') });
+  pg.cells.push({ r: 2, c: 11, c2: 30, k: 'sm', text: '作業日　' + workDateStr(d.f) });
+}
+// 見出し＋点線の行が並ぶ欄
+function section(pg, r, n, label, lines) {
+  pg.boxes.push([r, 1, r + n, 30]);
+  pg.cells.push({ r, c: 1, c2: 30, k: 'label', text: label });
+  for (let i = 0; i < n; i++) {
+    pg.dots.push([r + i, 1, 30]);
+    if (lines[i]) pg.cells.push({ r: r + 1 + i, c: 1, c2: 30, k: 'val', text: lines[i] });
+  }
+}
+async function buildLayout(d, phs, withImages = true) {
+  const f = d.f, pages = [];
+  /* ---- 1ページ目：雛形どおり ---- */
+  const p1 = newPage('作業指示書'); pages.push(p1);
+  p1.boxes.push([1, 1, 2, 5], [1, 6, 1, 15], [2, 6, 2, 15]);
+  p1.cells.push({ r: 1, r2: 2, c: 1, c2: 5, k: 'title', text: '◎作業指示書' });
+  p1.cells.push({ r: 1, c: 6, c2: 15, k: 'sm', text: '作成日　　' + jpDate(f.makeDate) });
+  p1.cells.push({ r: 2, c: 6, c2: 15, k: 'sm', text: '作成者　　' + (f.author || '') });
+  const one = (r, c1, c2, label, val) => {
+    p1.boxes.push([r, c1, r + 1, c2]);
+    p1.cells.push({ r, c: c1, c2, k: 'label', text: label });
+    if (val) p1.cells.push({ r: r + 1, c: c1, c2, k: 'val', text: val });
+  };
+  one(3, 1, 10, '工事名', f.koji); one(3, 11, 20, '作業日', workDateStr(f)); one(3, 21, 30, '使用車両', f.car);
+  one(5, 1, 10, '作業人員', f.members); one(5, 11, 20, '集合場所', f.meetPlace); one(5, 21, 30, '集合時間', timeStr(f.meetTime));
+  const two = (r, c1, c2, label, key) => {
+    p1.boxes.push([r, c1, r + 2, c2]);
+    p1.cells.push({ r, c: c1, c2, k: 'label', text: label });
+    fitLines(linesFor(d, key), 2).forEach((t, i) => { if (t) p1.cells.push({ r: r + 1 + i, c: c1, c2, k: 'val', text: t }); });
+  };
+  two(7, 1, 15, '元請', 'motouke'); two(7, 16, 30, '担当者/連絡先', 'tanto');
+  two(10, 1, 15, '客先', 'kyaku'); two(10, 16, 30, '客先住所', 'address');
+  two(13, 1, 15, '駐車場', 'parking'); two(13, 16, 30, '協力会社', 'kyoryoku');
+  // 下の4つの欄は、合計30行の中で行数を融通し合う（1ページに必ず収める）
+  const al = allocate(d);
+  let r = 16;
+  SECS.forEach((s, i) => {
+    section(p1, r, al.alloc[i], s.label, fitLines(al.lines[i], al.alloc[i]));
+    r += al.alloc[i] + 1;
+  });
+
+  /* ---- 現場写真：1ページ4枚 ---- */
+  const TOPS = [3, 15, 27, 39];
+  for (let i = 0; i < phs.length; i += PER_PAGE) {
+    const no = i / PER_PAGE + 1;
+    const pp = newPage('現場写真' + no); pages.push(pp);
+    pageHead(pp, d, '◎現場写真');
+    for (let b = 0; b < PER_PAGE && i + b < phs.length; b++) {
+      const p = phs[i + b], T = TOPS[b];
+      pp.boxes.push([T, 1, T + 10, 20]);
+      pp.imgs.push({ r: T, c: 1, r2: T + 10, c2: 20, p, cv: withImages ? await compose(p, 1600) : null });
+      section(pp, T, MEMO_LINES, `写真 No.${i + b + 1}`, wrap(p.memo, textW(MEMO_COLS)));
+      // section() は30列幅なので、右側（21〜30列）に置き直す
+      fixRight(pp, T);
+    }
+  }
+  return pages;
+}
+// 写真の右側のメモ欄（21〜30列）
+function fixRight(pg, T) {
+  const box = pg.boxes[pg.boxes.length - 1]; box[1] = 21;
+  pg.dots.forEach(x => { if (x[0] >= T && x[0] < T + MEMO_LINES) x[1] = 21; });
+  pg.cells.forEach(c => { if (c.r >= T && c.r <= T + MEMO_LINES && c.c === 1 && c.c2 === 30) c.c = 21; });
+}
+
+/* ---- マス目を画像に描く（PDFと仕上がり表示） ---- */
+const PAGE_W = 210, PAGE_H = 297;
+const GX = (PAGE_W - COLS * COL_MM) / 2, GY = (PAGE_H - ROWS * ROW_MM) / 2;
+function drawText(g, t, x0, y0, x1, y1, k) {
+  if (!t.text) return;
+  const sp = KIND[t.k] || KIND.val;
+  let size = sp.pt * PT * k;
+  const avail = x1 - x0 - PAD * 2 * k;
+  g.font = `${size}px ${FONT}`;
+  let w = g.measureText(t.text).width;
+  if (w > avail) { size = Math.max(size * 0.62, size * avail / w); g.font = `${size}px ${FONT}`; w = g.measureText(t.text).width; }
+  const sx = w > avail ? avail / w : 1;
+  const x = x0 + PAD * k, y = (y0 + y1) / 2;
+  g.fillStyle = '#000'; g.textBaseline = 'middle'; g.textAlign = 'left';
+  g.save(); g.translate(x, y); g.scale(sx, 1); g.fillText(t.text, 0, 0); g.restore();
+  if (sp.ul) { g.fillRect(x, y + size * 0.55, w * sx, Math.max(1, size * 0.06)); }
+}
+function renderPage(pg, dpi) {
+  const k = dpi / 25.4;
+  const cv = document.createElement('canvas'); cv.width = Math.round(PAGE_W * k); cv.height = Math.round(PAGE_H * k);
+  const g = cv.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height);
+  const X = c => (GX + (c - 1) * COL_MM) * k, Y = r => (GY + (r - 1) * ROW_MM) * k;
+  for (const im of pg.imgs) {
+    if (!im.cv) continue;
+    const x0 = X(im.c), y0 = Y(im.r), bw = X(im.c2 + 1) - x0, bh = Y(im.r2 + 1) - y0, m = 1.2 * k;
+    const s = Math.min((bw - 2 * m) / im.cv.width, (bh - 2 * m) / im.cv.height);
+    const w = im.cv.width * s, h = im.cv.height * s;
+    g.drawImage(im.cv, x0 + (bw - w) / 2, y0 + (bh - h) / 2, w, h);
+  }
+  g.strokeStyle = '#666'; g.lineWidth = Math.max(1, 0.14 * k); g.setLineDash([0.3 * k, 0.45 * k]);
+  for (const [r, c1, c2] of pg.dots) { const y = Y(r + 1); g.beginPath(); g.moveTo(X(c1), y); g.lineTo(X(c2 + 1), y); g.stroke(); }
+  g.setLineDash([]); g.strokeStyle = '#000'; g.lineWidth = Math.max(1, 0.26 * k);
+  for (const [r1, c1, r2, c2] of pg.boxes) g.strokeRect(X(c1), Y(r1), X(c2 + 1) - X(c1), Y(r2 + 1) - Y(r1));
+  for (const t of pg.cells) drawText(g, t, X(t.c), Y(t.r), X((t.c2 || t.c) + 1), Y((t.r2 || t.r) + 1), k);
+  return cv;
+}
+window.buildLayout = buildLayout; window.renderPage = renderPage; // 動作確認用
+
+/* ================= PDF（ページ画像を並べたPDF） ================= */
+const enc = new TextEncoder();
+async function buildPdf(canvases) {
+  const chunks = [], offs = []; let pos = 0;
+  const add = x => { const u = typeof x === 'string' ? enc.encode(x) : x; chunks.push(u); pos += u.length; };
+  const obj = (n, body) => { offs[n] = pos; add(`${n} 0 obj\n`); (Array.isArray(body) ? body : [body]).forEach(add); add('\nendobj\n'); };
+  add(new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34, 0x0A, 0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A])); // %PDF-1.4
+  const n = canvases.length, W = 595.28, H = 841.89;
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, `<< /Type /Pages /Kids [${canvases.map((_, i) => `${3 + i * 3} 0 R`).join(' ')}] /Count ${n} >>`);
+  for (let i = 0; i < n; i++) {
+    const cv = canvases[i], pn = 3 + i * 3;
+    const jpg = new Uint8Array(await (await toBlob(cv, 'image/jpeg', 0.85)).arrayBuffer());
+    const content = `q ${W} 0 0 ${H} 0 0 cm /Im0 Do Q`;
+    obj(pn, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im0 ${pn + 2} 0 R >> >> /Contents ${pn + 1} 0 R >>`);
+    obj(pn + 1, `<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+    obj(pn + 2, [`<< /Type /XObject /Subtype /Image /Width ${cv.width} /Height ${cv.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`, jpg, '\nendstream']);
+  }
+  const total = 3 + n * 3, xref = pos;
+  let x = `xref\n0 ${total}\n0000000000 65535 f \n`;
+  for (let i = 1; i < total; i++) x += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+  add(x + `trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(chunks, { type: 'application/pdf' });
+}
+
+/* ================= Excel出力 =================
+   xlsx（zip）を自前で組み立てる（写真報告書アプリと同じ方式。iPhoneのプレビューでも写真が見える） */
+const xmlEsc = s => String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_TABLE[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipStore(files) {
+  const parts = [], central = []; let offset = 0;
+  const d = new Date();
+  const dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  const dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (const f of files) {
+    const name = enc.encode(f.name), data = typeof f.data === 'string' ? enc.encode(f.data) : f.data, crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, dosTime, true); h.setUint16(12, dosDate, true); h.setUint32(14, crc, true);
+    h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    parts.push(h.buffer, name, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, dosTime, true); c.setUint16(14, dosDate, true); c.setUint32(16, crc, true);
+    c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true);
+    c.setUint32(42, offset, true);
+    central.push(c.buffer, name);
+    offset += 30 + name.length + data.length;
+  }
+  const cdSize = central.reduce((a, b) => a + b.byteLength, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+  e.setUint32(12, cdSize, true); e.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, e.buffer], { type: XLSX_MIME });
+}
+const XL_FONT = 'BIZ UD明朝 Medium';
+function makeStyles() {
+  const fontXml = (sz, ul) => `<font>${ul ? '<u/>' : ''}<sz val="${sz}"/><name val="${XL_FONT}"/><family val="1"/><charset val="128"/></font>`;
+  // 標準フォントは雛形と同じ游ゴシック11（列の幅がこのフォントで決まるため）
+  const fonts = ['<font><sz val="11"/><name val="游ゴシック"/><family val="2"/><charset val="128"/></font>'];
+  const borders = ['<border><left/><right/><top/><bottom/><diagonal/></border>'];
+  const xfs = ['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'];
+  const idx = (arr, x) => { let i = arr.indexOf(x); if (i < 0) { arr.push(x); i = arr.length - 1; } return i; };
+  // 外枠は黒の細線。欄の中の行の線は薄いグレーの細線（点線はiPhoneで見えないことがあるため）
+  const side = (tag, s) => s === 'solid' ? `<${tag} style="thin"><color rgb="FF000000"/></${tag}>`
+    : s === 'inner' ? `<${tag} style="thin"><color rgb="FFB4B4B4"/></${tag}>` : `<${tag}/>`;
+  return {
+    xf({ kind, border = {}, numFmt = 0 }) {
+      const sp = kind && KIND[kind];
+      const fi = sp ? idx(fonts, fontXml(sp.pt, sp.ul)) : 0;
+      const bi = idx(borders, `<border>${side('left', border.l)}${side('right', border.r)}${side('top', border.t)}${side('bottom', border.b)}<diagonal/></border>`);
+      const al = sp ? '<alignment horizontal="left" vertical="center" shrinkToFit="1"/>' : '<alignment vertical="center"/>';
+      return idx(xfs, `<xf numFmtId="${numFmt}" fontId="${fi}" fillId="0" borderId="${bi}" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1">${al}</xf>`);
+    },
+    xml() {
+      return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+        '<numFmts count="1"><numFmt numFmtId="177" formatCode=";;;"/></numFmts>' +
+        `<fonts count="${fonts.length}">${fonts.join('')}</fonts>` +
+        '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>' +
+        `<borders count="${borders.length}">${borders.join('')}</borders>` +
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+        `<cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs>` +
+        '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+    },
+  };
+}
+const colName = c => { let s = ''; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s; };
+async function buildXlsx(pages) {
+  const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+  const NSR = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const EMU = px => Math.round(px * 9525);
+  const COL_PX = 20, ROW_PX = 20, COL_W = 2.5; // 雛形と同じ（幅2.5 = 15pt、行15pt）
+  const st = makeStyles(), S_HID = st.xf({ numFmt: 177 });
+  const sst = [], sstMap = new Map();
+  const sIdx = s => { if (!sstMap.has(s)) { sstMap.set(s, sst.length); sst.push(s); } return sstMap.get(s); };
+  const files = [], media = [], names = [];
+  let imgNo = 0;
+  for (let pi = 0; pi < pages.length; pi++) {
+    const pg = pages[pi], sn = pi + 1; names.push(pg.name);
+    // 罫線をマスごとに割り振る
+    const edges = new Map();
+    const E = (r, c) => { const k = r * 100 + c; let e = edges.get(k); if (!e) { e = {}; edges.set(k, e); } return e; };
+    for (const [r, c1, c2] of pg.dots) for (let c = c1; c <= c2; c++) { E(r, c).b = 'inner'; E(r + 1, c).t = 'inner'; }
+    for (const [r1, c1, r2, c2] of pg.boxes) {
+      for (let c = c1; c <= c2; c++) { E(r1, c).t = 'solid'; E(r2, c).b = 'solid'; }
+      for (let r = r1; r <= r2; r++) { E(r, c1).l = 'solid'; E(r, c2).r = 'solid'; }
+    }
+    const vals = new Map(), merges = [];
+    for (const t of pg.cells) {
+      const r2 = t.r2 || t.r, c2 = t.c2 || t.c;
+      vals.set(t.r * 100 + t.c, t);
+      if (r2 > t.r || c2 > t.c) merges.push(`${colName(t.c)}${t.r}:${colName(c2)}${r2}`);
+    }
+    let rowsXml = '';
+    for (let r = 1; r <= ROWS; r++) {
+      let cx = '';
+      for (let c = 1; c <= COLS; c++) {
+        const k = r * 100 + c, e = edges.get(k), v = vals.get(k);
+        if (!e && !v) continue;
+        const s = st.xf({ kind: v ? v.k : null, border: e || {} }), ref = colName(c) + r;
+        cx += v && v.text ? `<c r="${ref}" s="${s}" t="s"><v>${sIdx(v.text)}</v></c>` : `<c r="${ref}" s="${s}"/>`;
+      }
+      // iPhoneのプレビューは「値が入っている最後の行」までしか表示しないため、印刷範囲の外に見えない値を置く
+      if (r === ROWS) cx += `<c r="${colName(COLS + 1)}${r}" s="${S_HID}"><v>0</v></c>`;
+      rowsXml += `<row r="${r}" ht="15" customHeight="1">${cx}</row>`;
+    }
+    // 写真
+    const anchors = [], drawRels = [];
+    for (const im of pg.imgs) {
+      if (!im.cv) continue;
+      const bytes = new Uint8Array(await (await toBlob(im.cv, 'image/jpeg', 0.85)).arrayBuffer());
+      imgNo++; media.push({ name: `xl/media/image${imgNo}.jpeg`, data: bytes });
+      const x0 = (im.c - 1) * COL_PX, y0 = (im.r - 1) * ROW_PX;
+      const bw = (im.c2 - im.c + 1) * COL_PX, bh = (im.r2 - im.r + 1) * ROW_PX;
+      const s = Math.min((bw - 8) / im.cv.width, (bh - 8) / im.cv.height);
+      const w = Math.round(im.cv.width * s), h = Math.round(im.cv.height * s);
+      const x = x0 + (bw - w) / 2, y = y0 + (bh - h) / 2;
+      const at = (pos, size) => { const i = Math.floor(pos / size); return { i, off: pos - i * size }; };
+      const f1 = at(x, COL_PX), f2 = at(x + w, COL_PX), r1 = at(y, ROW_PX), r2 = at(y + h, ROW_PX);
+      const rid = `rId${drawRels.length + 1}`, n = anchors.length + 1;
+      drawRels.push(`<Relationship Id="${rid}" Type="${NSR}/image" Target="../media/image${imgNo}.jpeg"/>`);
+      anchors.push(
+        '<xdr:twoCellAnchor editAs="oneCell">' +
+        `<xdr:from><xdr:col>${f1.i}</xdr:col><xdr:colOff>${EMU(f1.off)}</xdr:colOff><xdr:row>${r1.i}</xdr:row><xdr:rowOff>${EMU(r1.off)}</xdr:rowOff></xdr:from>` +
+        `<xdr:to><xdr:col>${f2.i}</xdr:col><xdr:colOff>${EMU(f2.off)}</xdr:colOff><xdr:row>${r2.i}</xdr:row><xdr:rowOff>${EMU(r2.off)}</xdr:rowOff></xdr:to>` +
+        `<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${n + 1}" name="図 ${n}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>` +
+        `<xdr:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>` +
+        `<xdr:spPr><a:xfrm><a:off x="${EMU(x)}" y="${EMU(y)}"/><a:ext cx="${EMU(w)}" cy="${EMU(h)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr>` +
+        '</xdr:pic><xdr:clientData/></xdr:twoCellAnchor>');
+    }
+    files.push({ name: `xl/worksheets/sheet${sn}.xml`, data: HEAD +
+      `<worksheet xmlns="${NS}" xmlns:r="${NSR}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:${colName(COLS + 1)}${ROWS}"/>` +
+      `<sheetViews><sheetView showGridLines="0"${pi === 0 ? ' tabSelected="1"' : ''} workbookViewId="0"/></sheetViews>` +
+      '<sheetFormatPr defaultColWidth="2.5" defaultRowHeight="15" customHeight="1"/>' +
+      `<cols><col min="1" max="${COLS + 1}" width="${COL_W}" customWidth="1"/></cols>` +
+      `<sheetData>${rowsXml}</sheetData>` +
+      (merges.length ? `<mergeCells count="${merges.length}">${merges.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells>` : '') +
+      '<printOptions horizontalCentered="1"/>' +
+      '<pageMargins left="0.433" right="0.433" top="0.354" bottom="0.354" header="0.315" footer="0.315"/>' +
+      '<pageSetup paperSize="9" fitToWidth="1" fitToHeight="1" orientation="portrait"/>' +
+      (anchors.length ? '<drawing r:id="rId1"/>' : '') + '</worksheet>' });
+    if (anchors.length) {
+      files.push({ name: `xl/worksheets/_rels/sheet${sn}.xml.rels`, data: HEAD +
+        `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${NSR}/drawing" Target="../drawings/drawing${sn}.xml"/></Relationships>` });
+      files.push({ name: `xl/drawings/drawing${sn}.xml`, data: HEAD +
+        `<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="${NSR}">${anchors.join('')}</xdr:wsDr>` });
+      files.push({ name: `xl/drawings/_rels/drawing${sn}.xml.rels`, data: HEAD +
+        `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${drawRels.join('')}</Relationships>` });
+    }
+  }
+  const n = names.length;
+  const hasDrawing = i => files.some(f => f.name === `xl/drawings/drawing${i}.xml`);
+  const head = [
+    { name: '[Content_Types].xml', data: HEAD +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/><Default Extension="jpeg" ContentType="image/jpeg"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      names.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>` +
+        (hasDrawing(i + 1) ? `<Override PartName="/xl/drawings/drawing${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>` : '')).join('') +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>' +
+      '</Types>' },
+    { name: '_rels/.rels', data: HEAD +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${NSR}/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+    { name: 'xl/workbook.xml', data: HEAD +
+      `<workbook xmlns="${NS}" xmlns:r="${NSR}"><bookViews><workbookView/></bookViews><sheets>` +
+      names.map((s, i) => `<sheet name="${xmlEsc(s)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets><definedNames>' +
+      names.map((s, i) => `<definedName name="_xlnm.Print_Area" localSheetId="${i}">'${xmlEsc(s)}'!$A$1:$${colName(COLS)}$${ROWS}</definedName>`).join('') +
+      '</definedNames></workbook>' },
+    { name: 'xl/_rels/workbook.xml.rels', data: HEAD +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      names.map((_, i) => `<Relationship Id="rId${i + 1}" Type="${NSR}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') +
+      `<Relationship Id="rId${n + 1}" Type="${NSR}/styles" Target="styles.xml"/>` +
+      `<Relationship Id="rId${n + 2}" Type="${NSR}/sharedStrings" Target="sharedStrings.xml"/></Relationships>` },
+    { name: 'xl/styles.xml', data: st.xml() },
+    { name: 'xl/sharedStrings.xml', data: HEAD +
+      `<sst xmlns="${NS}" count="${sst.length}" uniqueCount="${sst.length}">` +
+      sst.map(s => `<si><t xml:space="preserve">${xmlEsc(s)}</t></si>`).join('') + '</sst>' },
+  ];
+  return zipStore([...head, ...files, ...media]);
+}
+
+/* ================= 入力画面 ================= */
+function setTitle() { $('#hTitle').textContent = (cur && cur.f.koji) || '新しい作業指示書'; }
+function updCounts() {
+  if (!cur) return;
+  const al = allocate(cur);
+  $$('[data-cnt]').forEach(e => {
+    const key = e.dataset.cnt, si = SECS.findIndex(s => s.key === key);
+    let txt, cls = '';
+    if (si < 0) { // 元請などの2行の欄
+      const n = linesFor(cur, key).length;
+      txt = `${n}/2行`; if (n > 2) { txt += '（2行目の文字が小さくなります）'; cls = 'over'; }
+    } else {
+      const n = al.need[si], def = SECS[si].def, a = al.alloc[si];
+      txt = `${n}/${def}行`;
+      if (n > a) { txt = `${n}行：1ページに入りきりません（あと${al.short}行減らしてください）`; cls = 'over'; }
+      else if (n > def) { txt = `${n}行（空いている欄の行を使って収めます）`; cls = 'warn'; }
+    }
+    e.textContent = txt;
+    e.classList.toggle('over', cls === 'over'); e.classList.toggle('warn', cls === 'warn');
+  });
+}
+const updCountsLater = debounce(updCounts, 250);
+function fillForm() {
+  $$('[data-k]').forEach(e => { e.value = cur.f[e.dataset.k] || ''; });
+  renderMats(); renderPhotos(); updCounts(); setTitle();
+}
+$$('[data-k]').forEach(e => e.addEventListener('input', () => {
+  if (!cur) return;
+  const k = e.dataset.k; cur.f[k] = e.value;
+  if (k === 'author') { cfg.author = e.value; saveCfg(); }
+  if (k === 'koji') setTitle();
+  touch(); updCountsLater();
+}));
+// 住所などから地図を開く
+$$('[data-map]').forEach(b => b.addEventListener('click', e => {
+  e.preventDefault();
+  const q = (cur.f[b.dataset.map] || '').replace(/\s+/g, ' ').trim();
+  if (!q) return toast('先に住所や場所を入力してください');
+  const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && 'ontouchend' in document);
+  const url = apple ? 'https://maps.apple.com/?q=' + encodeURIComponent(q) : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+  window.open(url, '_blank');
+}));
+
+/* ---- 発注部材 ---- */
+function renderMats() {
+  const box = $('#mats'); box.innerHTML = '';
+  cur.mats.forEach((m, i) => {
+    const row = el('div', 'mat');
+    const chk = el('button', 'mchk' + (m.done ? ' on' : ''), m.done ? '✓ 発注済' : '未発注');
+    const name = el('input', 'mname'); name.type = 'text'; name.value = m.name || ''; name.placeholder = '部材名・数量（例：SUS管 25A ×4本）';
+    const del = el('button', 'mdel', '✕'); del.title = '削除';
+    const dl = el('label', 'mdl', '発注日'); const date = el('input'); date.type = 'date'; date.value = m.date || ''; dl.appendChild(date);
+    dl.hidden = !m.done;
+    chk.addEventListener('click', () => { m.done = !m.done; if (m.done && !m.date) m.date = todayStr(); touch(); renderMats(); updCounts(); });
+    name.addEventListener('input', () => { m.name = name.value; touch(); updCountsLater(); });
+    date.addEventListener('input', () => { m.date = date.value; touch(); updCountsLater(); });
+    del.addEventListener('click', () => {
+      if ((m.name || '').trim() && !confirm(`「${m.name}」を消しますか？`)) return;
+      cur.mats.splice(i, 1); touch(); renderMats(); updCounts();
+    });
+    row.append(chk, name, del, dl); box.appendChild(row);
+  });
+}
+$('#matAdd').addEventListener('click', () => {
+  cur.mats.push({ id: uid(), name: '', done: false, date: '' }); touch(); renderMats();
+  const ins = $$('#mats .mname'); ins[ins.length - 1].focus();
+});
+
+/* ---- 現場写真 ---- */
+function renderPhotos() {
+  const grid = $('#phGrid'); grid.innerHTML = '';
+  const ps = sortedPhotos();
+  ps.forEach((p, i) => {
+    const c = el('div', 'pcard'); c.dataset.id = p.id;
+    const im = el('div', 'pim'); thumbOf(p).then(u => { im.style.backgroundImage = `url("${u}")`; }).catch(() => {});
+    c.append(im, el('div', 'pno', `No.${i + 1}`), el('div', 'pmemo' + (p.memo ? '' : ' faint'), p.memo ? p.memo.replace(/\n/g, ' ') : 'タップしてメモ'));
+    grid.appendChild(c);
+  });
+  $('#phCnt').textContent = ps.length ? `${ps.length}枚（${Math.ceil(ps.length / PER_PAGE)}ページ）` : '';
+}
+let pickMode = null;
+$('#btnShot').addEventListener('click', () => $('#camIn').click());
+$('#btnPick').addEventListener('click', () => $('#libIn').click());
+['#camIn', '#libIn'].forEach(sel => $(sel).addEventListener('change', async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  if (!files.length || !cur) return;
+  busy(true, '写真を取り込み中…');
+  let order = photos.reduce((m, p) => Math.max(m, p.order), -1);
+  try {
+    for (const f of files) {
+      try {
+        const { blob, w, h } = await normalizeImage(f);
+        const p = { id: uid(), rid: cur.id, order: ++order, blob, w, h, rot: 0, memo: '', v: uid() };
+        await dbPut(p); photos.push(p);
+      } catch (err) { toast('写真を読み込めませんでした: ' + err.message); }
+    }
+  } finally { busy(false); }
+  touch(); renderPhotos(); summarizeLater();
+}));
+window.addPhotoFiles = async files => { // 動作確認用
+  let order = photos.reduce((m, p) => Math.max(m, p.order), -1);
+  for (const f of files) { const { blob, w, h } = await normalizeImage(f); const p = { id: uid(), rid: cur.id, order: ++order, blob, w, h, rot: 0, memo: '', v: uid() }; await dbPut(p); photos.push(p); }
+  renderPhotos(); summarizeLater();
+};
+function actionSheet(title, build) {
+  $('#shTitle').textContent = title;
+  const box = $('#shBtns'); box.innerHTML = '';
+  build((label, desc, fn, cls) => {
+    const b = el('button', 'btn' + (cls ? ' ' + cls : ''), label);
+    if (desc) b.appendChild(el('span', 'desc', desc));
+    b.addEventListener('click', () => { $('#sheet').hidden = true; fn && fn(); });
+    box.appendChild(b);
+  });
+  $('#sheet').hidden = false;
+}
+$('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('#sheet').hidden = true; });
+async function savePhoto(p) { await dbPut(p); touch(); }
+$('#phGrid').addEventListener('click', e => {
+  const c = e.target.closest('.pcard'); if (!c) return;
+  const ps = sortedPhotos(), i = ps.findIndex(p => p.id === c.dataset.id), p = ps[i];
+  actionSheet(`写真 No.${i + 1}`, add => {
+    add('📝 メモを書く', '', () => openMemo(i), 'primary');
+    add('⟳ 90度回転', '', async () => { p.rot = ((p.rot || 0) + 90) % 360; await savePhoto(p); renderPhotos(); summarizeLater(); });
+    if (i > 0) add('↑ 1つ前と入れ替え', '', () => swap(ps[i], ps[i - 1]));
+    if (i < ps.length - 1) add('↓ 1つ後と入れ替え', '', () => swap(ps[i], ps[i + 1]));
+    add('🗑 この写真を削除', '元に戻せません', async () => {
+      if (!confirm(`写真 No.${i + 1} を削除しますか？`)) return;
+      photos = photos.filter(x => x !== p); imgCache.delete(p.id); await dbDel(p.id); touch(); renderPhotos(); summarizeLater();
+    }, 'danger');
+    add('閉じる', '', null);
+  });
+});
+async function swap(a, b) { const t = a.order; a.order = b.order; b.order = t; await dbPut(a); await dbPut(b); touch(); renderPhotos(); summarizeLater(); }
+/* ---- 写真のメモ ---- */
+let mi = -1;
+function openMemo(i) {
+  const ps = sortedPhotos(); if (i < 0 || i >= ps.length) return;
+  mi = i; const p = ps[i];
+  $('#mHead').textContent = `写真 No.${i + 1}`;
+  $('#mPrev').disabled = i === 0; $('#mNext').disabled = i === ps.length - 1;
+  $('#mText').value = p.memo || ''; memoCount();
+  const im = $('#mImg'); im.removeAttribute('src');
+  thumbOf(p).then(u => { if (mi === i) im.src = u; });
+  $('#memo').hidden = false;
+}
+function memoCount() {
+  const n = wrap($('#mText').value, textW(MEMO_COLS)).length, e = $('#mCnt');
+  e.textContent = n > MEMO_LINES ? `${n}/${MEMO_LINES}行（入りきりません）` : `${n}/${MEMO_LINES}行`;
+  e.classList.toggle('over', n > MEMO_LINES);
+}
+$('#mText').addEventListener('input', debounce(async () => {
+  const p = sortedPhotos()[mi]; if (!p) return;
+  p.memo = $('#mText').value; memoCount(); await savePhoto(p);
+}, 300));
+function closeMemo(next) {
+  const p = sortedPhotos()[mi];
+  if (p && p.memo !== $('#mText').value) { p.memo = $('#mText').value; savePhoto(p); }
+  if (next != null) return openMemo(next);
+  $('#memo').hidden = true; mi = -1; renderPhotos(); summarizeLater();
+}
+$('#mDone').addEventListener('click', () => closeMemo());
+$('#mPrev').addEventListener('click', () => closeMemo(mi - 1));
+$('#mNext').addEventListener('click', () => closeMemo(mi + 1));
+
+/* ================= 仕上がり・出力 ================= */
+$('#btnPreview').addEventListener('click', async () => {
+  busy(true, '仕上がりを作成中…');
+  try {
+    const pages = await buildLayout(cur, sortedPhotos());
+    const box = $('#pvBox'); box.innerHTML = '';
+    const dpi = Math.min(220, Math.max(110, (Math.min(box.clientWidth || window.innerWidth, 900) * (window.devicePixelRatio || 1)) / (PAGE_W / 25.4)));
+    pages.forEach((pg, i) => { box.appendChild(el('div', 'pvcap', `${i + 1}ページ目（${pg.name}）`)); box.appendChild(renderPage(pg, dpi)); });
+    $('#preview').hidden = false;
+  } catch (e) { alert('仕上がりの作成に失敗しました。\n' + e.message); }
+  finally { busy(false); }
+});
+$('#pvClose').addEventListener('click', () => { $('#preview').hidden = true; $('#pvBox').innerHTML = ''; });
+
+function fileBase() {
+  const d = (cur.f.workDate || cur.f.makeDate || todayStr()).replace(/-/g, '');
+  const t = (cur.f.koji || '').replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40);
+  return `作業指示書_${d}${t ? '_' + t : ''}`;
+}
+function download(file) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+let outFiles = null;
+async function share(files) {
+  const text = ['作業指示書', cur.f.koji, workDateStr(cur.f)].filter(Boolean).join('　');
+  if (navigator.canShare && navigator.canShare({ files })) {
+    try { await navigator.share({ files, title: text }); markExported(); }
+    catch (e) { if (e.name !== 'AbortError') { toast('共有できなかったので保存します'); files.forEach(download); markExported(); } }
+  } else { files.forEach(download); markExported(); toast('ダウンロードしました'); }
+}
+function markExported() { if (!cur) return; cur.exported = Date.now(); saveDocs(); }
+$('#btnOut').addEventListener('click', async () => {
+  busy(true, 'PDFとExcelを作成中…');
+  try {
+    const pages = await buildLayout(cur, sortedPhotos());
+    const cvs = pages.map(pg => renderPage(pg, 200));
+    const pdf = new File([await buildPdf(cvs)], fileBase() + '.pdf', { type: 'application/pdf' });
+    const xlsx = new File([await buildXlsx(pages)], fileBase() + '.xlsx', { type: XLSX_MIME });
+    outFiles = { pdf, xlsx };
+    const mb = f => (f.size / 1024 / 1024).toFixed(1) + 'MB';
+    $('#readyMsg').textContent = `${pages.length}ページ　PDF ${mb(pdf)}・Excel ${mb(xlsx)}`;
+    $('#ready').hidden = false;
+  } catch (e) { alert('作成に失敗しました。\n' + e.message); }
+  finally { busy(false); }
+});
+window.makeOutFiles = async () => { // 動作確認用
+  const pages = await buildLayout(cur, sortedPhotos());
+  return { pdf: await buildPdf(pages.map(pg => renderPage(pg, 200))), xlsx: await buildXlsx(pages), pages: pages.length };
+};
+$('#rBoth').addEventListener('click', () => share([outFiles.pdf, outFiles.xlsx]));
+$('#rPdf').addEventListener('click', () => share([outFiles.pdf]));
+$('#rXlsx').addEventListener('click', () => share([outFiles.xlsx]));
+$('#rDl').addEventListener('click', () => { download(outFiles.pdf); setTimeout(() => download(outFiles.xlsx), 600); markExported(); });
+$('#rClose').addEventListener('click', () => { $('#ready').hidden = true; });
+
+/* ================= 一覧 ================= */
+async function summarize() {
+  const r = cur; if (!r) return;
+  const ps = sortedPhotos(); r.count = ps.length;
+  const f = ps[0], key = f ? `${f.id}:${f.v}:${f.rot || 0}` : '';
+  if (key !== r.thumbKey) {
+    r.thumbKey = key; r.thumb = '';
+    if (f) try { r.thumb = (await compose(f, 160)).toDataURL('image/jpeg', 0.6); } catch (e) {}
+  }
+  saveDocs();
+}
+const summarizeLater = debounce(() => summarize().catch(() => {}), 600);
+function showView(v) {
+  const home = v === 'home';
+  $('#home').hidden = !home; $('#edit').hidden = home; $('#bbar').hidden = home;
+  $('#btnBack').hidden = home; $('#btnMore').hidden = home;
+  if (home) $('#hTitle').textContent = '作業指示書';
+  window.scrollTo(0, 0);
+}
+async function openDoc(id) {
+  const d = docs.find(x => x.id === id); if (!d) return;
+  cur = d; photos = []; imgCache.clear();
+  try { photos = await dbByRid(id); } catch (e) { toast('写真を読めませんでした: ' + e.message); }
+  showView('edit'); fillForm();
+}
+const isEmptyDoc = d => !Object.entries(d.f).some(([k, v]) => k !== 'makeDate' && k !== 'author' && String(v || '').trim())
+  && !d.mats.some(m => (m.name || '').trim()) && !d.count;
+async function goHome() {
+  if (cur) {
+    if (!$('#memo').hidden) closeMemo();
+    try { await summarize(); } catch (e) {}
+    if (isEmptyDoc(cur) && !photos.length) docs = docs.filter(x => x !== cur);
+    saveDocs();
+  }
+  cur = null; photos = []; imgCache.clear(); showView('home'); renderList();
+}
+async function createDoc() { const d = newDoc(); docs.push(d); saveDocs(); await openDoc(d.id); }
+async function duplicateDoc(id) {
+  const src = docs.find(x => x.id === id); if (!src) return;
+  const f = Object.assign({}, src.f, { makeDate: todayStr(), author: cfg.author || src.f.author || '', workDate: '', workDateEnd: '' });
+  const d = newDoc({ f, mats: src.mats.map(m => ({ id: uid(), name: m.name, done: false, date: '' })) });
+  docs.push(d); saveDocs();
+  if (cur) await goHome();
+  await openDoc(d.id);
+  toast('複製しました（作業日は空、部材は未発注、写真なし）', 4000);
+}
+async function deleteDoc(id) {
+  const d = docs.find(x => x.id === id); if (!d) return;
+  const warn = d.exported ? '' : '\n\n※この指示書はまだ送信・保存していません。';
+  if (!confirm(`「${d.f.koji || '（工事名なし）'}」を削除しますか？\n写真も消え、元に戻せません。${warn}`)) return;
+  try { await dbDelRid(id); } catch (e) { toast('削除に失敗しました: ' + e.message); return; }
+  docs = docs.filter(x => x !== d); saveDocs();
+  cur = null; photos = []; showView('home'); renderList(); toast('削除しました');
+}
+function renderList() {
+  const words = $('#q').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const hay = d => {
+    const a = ymd(d.f.workDate);
+    return [...Object.values(d.f), workDateStr(d.f), a ? `${a.m}/${a.d}` : '', ...d.mats.map(m => m.name)].join(' ').toLowerCase();
+  };
+  const shown = docs.slice().sort((a, b) => b.updated - a.updated).filter(d => words.every(w => hay(d).includes(w)));
+  const list = $('#list'); list.innerHTML = '';
+  if (!docs.length) { list.appendChild(el('p', 'empty', 'まだ作業指示書がありません。\n右上の「＋ 新規作成」から始めてください。')); return; }
+  if (!shown.length) { list.appendChild(el('p', 'empty', '見つかりませんでした')); return; }
+  for (const d of shown) {
+    const card = el('div', 'card'); card.dataset.id = d.id;
+    const im = el('div', 'cimg', d.thumb ? '' : '📋');
+    if (d.thumb) im.style.backgroundImage = `url("${d.thumb}")`;
+    const body = el('div', 'cbody');
+    body.appendChild(el('div', 'ctitle' + (d.f.koji ? '' : ' faint'), d.f.koji || '（工事名なし）'));
+    body.appendChild(el('div', 'csub', '作業日：' + (workDateStr(d.f) || '未定') + (d.f.meetTime ? `　集合 ${timeStr(d.f.meetTime)}` : '')));
+    if (d.f.kyaku) body.appendChild(el('div', 'csub', d.f.kyaku.replace(/\n/g, ' ')));
+    const changed = d.exported && d.updated > d.exported + 2000;
+    body.appendChild(el('span', 'badge' + (d.exported ? changed ? ' warn' : ' ok' : ''),
+      d.exported ? changed ? '送信後に変更あり' : '✓ 送信・保存済み' : '未送信'));
+    const more = el('button', 'cmore', '⋯'); more.dataset.more = '1';
+    card.append(im, body, more); list.appendChild(card);
+  }
+}
+$('#list').addEventListener('click', e => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const id = card.dataset.id, d = docs.find(x => x.id === id);
+  if (!e.target.closest('[data-more]')) return openDoc(id);
+  actionSheet(d.f.koji || '（工事名なし）', add => {
+    add('開く', '', () => openDoc(id), 'primary');
+    add('📄 複製して新しく作る', '写真以外をコピーします（作業日は空、部材は未発注に戻ります）', () => duplicateDoc(id));
+    add('🗑 削除', '元に戻せません', () => deleteDoc(id), 'danger');
+    add('閉じる', '', null);
+  });
+});
+$('#btnMore').addEventListener('click', () => {
+  const id = cur.id;
+  actionSheet('この作業指示書', add => {
+    add('📄 複製して新しく作る', '写真以外をコピーします（作業日は空、部材は未発注に戻ります）', () => duplicateDoc(id));
+    add('🗑 この作業指示書を削除', '元に戻せません', () => deleteDoc(id), 'danger');
+    add('閉じる', '', null);
+  });
+});
+$('#q').addEventListener('input', debounce(renderList, 150));
+$('#btnCreate').addEventListener('click', createDoc);
+$('#btnBack').addEventListener('click', goHome);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveDocs(); });
+
+/* ================= 起動 ================= */
+loadStore();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+showView('home'); renderList();
+</script>
+</body>
+</html>
