@@ -291,27 +291,61 @@ function touch() { if (!cur) return; cur.updated = Date.now(); saveDocsLater(); 
 let dbp;
 function db() {
   if (!dbp) dbp = new Promise((res, rej) => {
-    const r = indexedDB.open('workOrder', 1);
-    r.onupgradeneeded = () => { const s = r.result.createObjectStore('photos', { keyPath: 'id' }); s.createIndex('rid', 'rid'); };
+    const r = indexedDB.open('workOrder', 2);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      if (!d.objectStoreNames.contains('photos')) d.createObjectStore('photos', { keyPath: 'id' }).createIndex('rid', 'rid');
+      // 写真の画像データは別の入れ物に分けて保存する（メモ・回転・並べ替えの保存は文字だけになり、軽く確実になる）
+      if (!d.objectStoreNames.contains('imgs')) d.createObjectStore('imgs', { keyPath: 'id' });
+    };
     r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
   });
   return dbp;
 }
-async function tx(mode, fn) {
+async function tx(mode, fn, now, stores = 'photos') {
   const d = await db();
   return new Promise((res, rej) => {
-    const t = d.transaction('photos', mode); const req = fn(t.objectStore('photos')); let out;
+    const t = d.transaction(stores, mode);
+    const arg = Array.isArray(stores) ? Object.fromEntries(stores.map(n => [n, t.objectStore(n)])) : t.objectStore(stores);
+    const req = fn(arg); let out;
     if (req) req.onsuccess = () => { out = req.result; };
+    // すぐに書き込みを確定させる（アプリを閉じられても保存が残るように）
+    if (now && t.commit) try { t.commit(); } catch (e) {}
     t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
   });
 }
-const dbPut = p => tx('readwrite', s => s.put(p));
-const dbDel = id => tx('readwrite', s => s.delete(id));
+/* iPhoneでは、保存済みの写真データ(Blob)をもう一度保存しようとすると失敗することがある。
+   そのため写真は imgs に1回だけ（ArrayBufferで）保存し、写真の記録(photos)にはメモなど文字だけを保存する */
+const rec = p => { if (!p.img) return p; const o = Object.assign({}, p); delete o.blob; return o; };
+const dbPut = p => tx('readwrite', s => s.put(rec(p)), true);
+const dbDel = id => tx('readwrite', s => { s.photos.delete(id); s.imgs.delete(id); }, true, ['photos', 'imgs']);
 const dbByRid = rid => tx('readonly', s => s.index('rid').getAll(rid));
 const dbDelRid = rid => tx('readwrite', s => {
-  const req = s.index('rid').openKeyCursor(IDBKeyRange.only(rid));
-  req.onsuccess = () => { const c = req.result; if (c) { s.delete(c.primaryKey); c.continue(); } };
-});
+  const req = s.photos.index('rid').openKeyCursor(IDBKeyRange.only(rid));
+  req.onsuccess = () => { const c = req.result; if (c) { s.photos.delete(c.primaryKey); s.imgs.delete(c.primaryKey); c.continue(); } };
+}, false, ['photos', 'imgs']);
+async function putImg(p) {
+  const buf = await p.blob.arrayBuffer();
+  await tx('readwrite', s => s.put({ id: p.id, buf, type: p.blob.type || 'image/jpeg' }), true, 'imgs');
+  p.img = true;
+}
+// 新しい写真を保存（分けて保存できないときは、記録に写真ごと保存する）
+async function addPhotoRec(p) { try { await putImg(p); } catch (e) {} await dbPut(p); }
+// 指示書の写真を読み込む。古い形式（記録に写真が入っている）は、ここで移し替える
+async function loadRecs(rid) {
+  const ps = await dbByRid(rid);
+  for (const p of ps) {
+    if (p.img) {
+      try {
+        const r = await tx('readonly', s => s.get(p.id), false, 'imgs');
+        if (r) p.blob = new Blob([r.buf], { type: r.type }); else { p.img = false; p.blob = null; }
+      } catch (e) { p.blob = null; }
+    } else if (p.blob) {
+      try { await putImg(p); await dbPut(p); } catch (e) {}
+    }
+  }
+  return ps.filter(p => p.blob);
+}
 const sortedPhotos = () => photos.slice().sort((a, b) => a.order - b.order);
 
 /* ================= 画像 ================= */
@@ -834,7 +868,7 @@ $('#btnPick').addEventListener('click', () => $('#libIn').click());
       try {
         const { blob, w, h } = await normalizeImage(f);
         const p = { id: uid(), rid: cur.id, order: ++order, blob, w, h, rot: 0, memo: '', v: uid() };
-        await dbPut(p); photos.push(p);
+        await addPhotoRec(p); photos.push(p);
       } catch (err) { toast('写真を読み込めませんでした: ' + err.message); }
     }
   } finally { busy(false); }
@@ -842,7 +876,7 @@ $('#btnPick').addEventListener('click', () => $('#libIn').click());
 }));
 window.addPhotoFiles = async files => { // 動作確認用
   let order = photos.reduce((m, p) => Math.max(m, p.order), -1);
-  for (const f of files) { const { blob, w, h } = await normalizeImage(f); const p = { id: uid(), rid: cur.id, order: ++order, blob, w, h, rot: 0, memo: '', v: uid() }; await dbPut(p); photos.push(p); }
+  for (const f of files) { const { blob, w, h } = await normalizeImage(f); const p = { id: uid(), rid: cur.id, order: ++order, blob, w, h, rot: 0, memo: '', v: uid() }; await addPhotoRec(p); photos.push(p); }
   renderPhotos(); summarizeLater();
 };
 function actionSheet(title, build) {
@@ -884,7 +918,7 @@ function openMemo(i) {
   $('#mText').value = p.memo || ''; memoCount();
   const im = $('#mImg'); im.removeAttribute('src');
   thumbOf(p).then(u => { if (mi === i) im.src = u; });
-  $('#memo').hidden = false;
+  $('#memo').hidden = false; setResume();
 }
 function memoCount() {
   const n = wrap($('#mText').value, textW(MEMO_COLS)).length, e = $('#mCnt');
@@ -899,7 +933,7 @@ function closeMemo(next) {
   const p = sortedPhotos()[mi];
   if (p && p.memo !== $('#mText').value) { p.memo = $('#mText').value; savePhoto(p); }
   if (next != null) return openMemo(next);
-  $('#memo').hidden = true; mi = -1; renderPhotos(); summarizeLater();
+  $('#memo').hidden = true; mi = -1; setResume(); renderPhotos(); summarizeLater();
 }
 $('#mDone').addEventListener('click', () => closeMemo());
 $('#mPrev').addEventListener('click', () => closeMemo(mi - 1));
@@ -983,8 +1017,8 @@ function showView(v) {
 async function openDoc(id) {
   const d = docs.find(x => x.id === id); if (!d) return;
   cur = d; photos = []; imgCache.clear();
-  try { photos = await dbByRid(id); } catch (e) { toast('写真を読めませんでした: ' + e.message); }
-  showView('edit'); fillForm();
+  try { photos = await loadRecs(id); } catch (e) { toast('写真を読めませんでした: ' + e.message); }
+  showView('edit'); fillForm(); setResume();
 }
 const isEmptyDoc = d => !Object.entries(d.f).some(([k, v]) => k !== 'makeDate' && k !== 'author' && String(v || '').trim())
   && !d.mats.some(m => (m.name || '').trim()) && !d.count;
@@ -995,7 +1029,7 @@ async function goHome() {
     if (isEmptyDoc(cur) && !photos.length) docs = docs.filter(x => x !== cur);
     saveDocs();
   }
-  cur = null; photos = []; imgCache.clear(); showView('home'); renderList();
+  cur = null; photos = []; imgCache.clear(); setResume(); showView('home'); renderList();
 }
 async function createDoc() { const d = newDoc(); docs.push(d); saveDocs(); await openDoc(d.id); }
 async function duplicateDoc(id) {
@@ -1062,12 +1096,37 @@ $('#btnMore').addEventListener('click', () => {
 $('#q').addEventListener('input', debounce(renderList, 150));
 $('#btnCreate').addEventListener('click', createDoc);
 $('#btnBack').addEventListener('click', goHome);
-document.addEventListener('visibilitychange', () => { if (document.hidden) saveDocs(); });
+/* ---- アプリを閉じる・他のアプリに切り替える前に、すぐ保存する ---- */
+function saveNow() {
+  if (!$('#memo').hidden) { const p = sortedPhotos()[mi]; if (p && p.memo !== $('#mText').value) { p.memo = $('#mText').value; savePhoto(p).catch(() => {}); } }
+  saveDocs();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });
+window.addEventListener('pagehide', saveNow);
+window.addEventListener('blur', saveNow);
+// 保存などで思わぬ失敗があったときは画面に出す（黙って消えないように）
+window.addEventListener('unhandledrejection', e => toast('うまく処理できませんでした: ' + ((e.reason && e.reason.message) || e.reason), 5000));
+// 次に開いたとき、作業していた指示書（とメモ入力中の写真）に戻れるように覚えておく
+const RESUME_KEY = 'workOrder.resume.v1';
+function setResume() {
+  try {
+    if (cur) localStorage.setItem(RESUME_KEY, JSON.stringify({ id: cur.id, memo: $('#memo').hidden ? -1 : mi }));
+    else localStorage.removeItem(RESUME_KEY);
+  } catch (e) {}
+}
 
 /* ================= 起動 ================= */
 loadStore();
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 showView('home'); renderList();
+(async () => {
+  // 前回、指示書を開いたまま閉じた場合は、その続きから始める
+  let rs = null; try { rs = JSON.parse(localStorage.getItem(RESUME_KEY)); } catch (e) {}
+  if (rs && docs.some(d => d.id === rs.id)) {
+    await openDoc(rs.id);
+    if (rs.memo >= 0 && cur) openMemo(rs.memo);
+  }
+})();
 </script>
 </body>
 </html>
